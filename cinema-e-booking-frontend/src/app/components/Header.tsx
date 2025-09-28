@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -8,6 +7,8 @@ import SearchModal from './SearchModal';
 const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [genre, setGenre] = useState('');
+  const [date, setDate] = useState('');
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
@@ -23,13 +24,29 @@ const Header = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      handleSearch(searchQuery);
+      handleSearch(searchQuery, { genre, date });
     }
+  };
+
+  const handleApplyFilters = (query: string, filters?: { genre: string; date: string }) => {
+    // Update the states with the filter values
+    setSearchQuery(query);
+    if (filters) {
+      setGenre(filters.genre);
+      setDate(filters.date);
+    }
+    handleSearch(query, filters);
+  };
+
+  const handleResetFilters = () => {
+    setGenre('');
+    setDate('');
+    setSearchQuery('');
   };
 
   return (
     <>
-      <header className="glass-header border-b border-uga-white/30 sticky top-0 z-40">
+      <header className="bg-black border-b-4 border-white sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Logo and Navigation */}
@@ -80,8 +97,15 @@ const Header = () => {
       <SearchModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onApplyFilters={handleSearch}
+        onApplyFilters={handleApplyFilters}
+        onResetFilters={handleResetFilters}
         triggerElement={filterButtonRef.current}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        genre={genre}
+        setGenre={setGenre}
+        date={date}
+        setDate={setDate}
       />
     </>
   );
