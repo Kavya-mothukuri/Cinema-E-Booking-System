@@ -1,10 +1,16 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { sequelize } = require('./models'); 
+const db = require('./models');  
 require('dotenv').config();
+const authRoutes = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 const app = express();
+app.use(express.json());
 
 app.use(cors({
   origin: 'http://localhost:3000', 
@@ -12,6 +18,11 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+
+app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is working ");
@@ -25,16 +36,9 @@ app.use('/movies', movieRoutes);
 app.use('/genres', genreRoutes);
 app.use('/shows', showRoutes);
 
-const PORT = process.env.PORT || 5000;
+db.sequelize.authenticate()
+  .then(() => console.log('Database connected successfully.'))
+  .catch(err => console.error('Database connection failed:', err));
 
-sequelize.authenticate()
-  .then(() => {
-    console.log('Database connected');
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('DB connection failed:', err);
-  });
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
